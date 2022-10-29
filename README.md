@@ -1,4 +1,4 @@
-# Arabic-HTML-Textarea
+# Arabic HTML Textarea
 Javascript packages that provide support for easier Arabic typing.
 
 
