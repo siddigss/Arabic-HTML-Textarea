@@ -34,5 +34,5 @@ By this we mean a collection of string that look different in the textarea than 
 
 ## Project Structure
 * `index.html` is the project testing page.  
-* The tasks are seperated among files in a module manner. Once things are working the files may be combined.
+* The rest of the files are seperated in a modules manner. Once things are working the files may be combined.
 
