@@ -18,7 +18,8 @@ Adding these additional characters require changing the default behaviour for
 * Deleting (both forward and backward).
 * Arrows
 * Click
-* Selection
+* Selection  
+
 We do this by attaching eventListerners. The most annoying hurdle right now is that eventListener are excuted before the default action of the textarea. This means either rewriting the default action or find how to call it in the eventListerner and the do `preventDefault()`.
 
 ### Browsers Copatibility
