@@ -24,7 +24,7 @@ We do this by attaching eventListerners. The most annoying hurdle right now is t
 ### Browsers Copatibility
 At the moment chrome and edge seem to work reasonably but firefox behaves weirdly.
 
-### Ensure Compatibility
+### Ensure Compatibility with Plain Textarea
 For ease of usage this package must minimize the conflicts with other packages. This endeavour rises querstions about property `value` of the textarea and copying and pasting and possibly other questiosn.
 
 ### Producing and Looking for Test Cases
