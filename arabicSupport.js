@@ -29,7 +29,7 @@ function textareaInputHook(e){
             e.target.selectionEnd = cursorPosition+2;
         }    
     }
-    if(e.inputType == 'deleteContentBackward'){
+    if(e.inputType == 'deleteContentBackward' || e.inputType == 'deleteContentForward'){
         let newContent = '';
         // assume no selection, is this always the case?
         let cursorPosition = e.target.selectionStart;
@@ -138,6 +138,7 @@ function textareaInputHook(e){
 
 
 
+
     // for testing, remove later
     document.getElementById('textarea2').value = toUnicode(e.target.value);
 }
@@ -152,49 +153,120 @@ function textareaHookDeletedText(e){
         deletedText = e.target.value.substr(e.target.selectionStart + correction
             , e.target.selectionEnd - e.target.selectionStart - correction);
     }
+    if(e.key == 'Delete'){
+        let correction = 0;
+        if(e.target.selectionStart == e.target.selectionEnd){
+            correction = +1;
+        }
+        deletedText = e.target.value.substr(e.target.selectionStart
+            , e.target.selectionEnd - e.target.selectionStart + correction);
+    }
+
     return '';
 }
 
-function textareaHookArrowsKeydown(e){
-    currentSelectionStart = e.target.selectionStart;
-    currentSelectionEnd = e.target.selectionEnd;
-    selection = (currentSelectionStart != currentSelectionEnd);
-    shiftHeld = e.shiftKey;
-    if(e.key == 'ArrowLeft'){
-        /*if(currentSelectionStart != currentSelectionEnd){
-            currentSelectionEnd = currentSelectionStart;
+
+function correctCursorPositions(ta, dir){
+    selection = (ta.selectionStart != ta.selectionEnd);
+    currentSelectionStart = ta.selectionStart;
+    currentSelectionEnd = ta.selectionEnd;
+
+    if(isAmbiguousChar(ta.value[currentSelectionStart-1])){
+        currentSelectionStart = currentSelectionStart - 2;
+        if(dir == 1){
+            currentSelectionStart = currentSelectionStart + 3;
         }
-        */
-        if(isAmbiguousChar(e.target.value[currentSelectionStart-1])){
-            currentSelectionStart = currentSelectionStart - 1;
-            if(selection){
-                if(currentSelectionEnd < currentSelectionStart + 2){
-                    currentSelectionEnd = currentSelectionStart + 2;
-                }
+    }
+    else if((ta.value[currentSelectionStart-1] == LTRMark ||
+        ta.value[currentSelectionStart-1] == RTLMark)){
+            if(isAmbiguousChar(ta.value[currentSelectionStart-2])){
+                // nothig
+            }
+            else{   // must mean the letter after is ambiguous.
+                currentSelectionStart = currentSelectionStart - 1;
+                if(dir == 1){
+                    currentSelectionStart = currentSelectionStart + 3;
+                }        
+            }
+    }
+    if(!selection){
+        currentSelectionEnd = currentSelectionStart;
+    }
+    else{
+        if(isAmbiguousChar(ta.value[currentSelectionEnd-1])){
+            currentSelectionEnd = currentSelectionEnd + 1;
+            if(dir == -1){
+                currentSelectionStart = currentSelectionStart - 3;
             }
         }
-        else if((e.target.value[currentSelectionStart-1] == LTRMark ||
-            e.target.value[currentSelectionStart-1] == RTLMark)){
-                if(isAmbiguousChar(e.target.value[currentSelectionStart-2])){
-                    currentSelectionStart = currentSelectionStart - 2;
+        else if((ta.value[currentSelectionEnd-1] == LTRMark ||
+            ta.value[currentSelectionEnd-1] == RTLMark)){
+                if(isAmbiguousChar(ta.value[currentSelectionEnd-2])){
+                    // nothig
                 }
                 else{   // must mean the letter after is ambiguous.
-                    if(selection){
-                        if(currentSelectionEnd < currentSelectionStart + 2){
-                            currentSelectionEnd = currentSelectionStart + 2;
-                        }
-                    }
+                    currentSelectionEnd = currentSelectionEnd + 2;
+                    if(dir == -1){
+                        currentSelectionStart = currentSelectionStart - 3;
+                    }        
                 }
-        }
-        if(!shiftHeld && selection)
-            currentSelectionEnd = currentSelectionStart + 1;
+        }    
     }
 
+    ta.selectionStart = currentSelectionStart;
+    ta.selectionEnd = currentSelectionEnd;
+}
+
+function correctCursorPositionsAfterKeydown(e){
+    ta = e.target;
+    dir = 0;
+    if(e.key == 'ArrowLeft'){
+        dir = -1;
+    }
+    if(e.key == 'ArrowRight'){
+        dir = 1;
+    }
+    correctCursorPositions(ta, dir);
+}
 
 
-    e.target.selectionStart = currentSelectionStart;
-    e.target.selectionEnd = currentSelectionEnd;
+function correctCursorPositionsAfterClick(ta){
+    selection = (ta.selectionStart != ta.selectionEnd);
+    currentSelectionStart = ta.selectionStart;
+    currentSelectionEnd = ta.selectionEnd;
 
+    if(isAmbiguousChar(ta.value[currentSelectionStart-1])){
+        currentSelectionStart = currentSelectionStart + 1;
+    }
+    else if((ta.value[currentSelectionStart-1] == LTRMark ||
+        ta.value[currentSelectionStart-1] == RTLMark)){
+            if(isAmbiguousChar(ta.value[currentSelectionStart-2])){
+                // nothig
+            }
+            else{   // must mean the letter after is ambiguous.
+                currentSelectionStart = currentSelectionStart - 1;
+            }
+    }
+    if(!selection){
+        currentSelectionEnd = currentSelectionStart;
+    }
+    else{
+        if(isAmbiguousChar(ta.value[currentSelectionEnd-1])){
+            currentSelectionEnd = currentSelectionEnd + 1;
+        }
+        else if((ta.value[currentSelectionEnd-1] == LTRMark ||
+            ta.value[currentSelectionEnd-1] == RTLMark)){
+                if(isAmbiguousChar(ta.value[currentSelectionEnd-2])){
+                    // nothig
+                }
+                else{   // must mean the letter after is ambiguous.
+                    currentSelectionEnd = currentSelectionEnd -1;
+                }
+        }    
+    }
+
+    ta.selectionStart = currentSelectionStart;
+    ta.selectionEnd = currentSelectionEnd;
 }
 
 

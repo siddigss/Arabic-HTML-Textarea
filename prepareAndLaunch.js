@@ -10,7 +10,8 @@ function fillTargetedTextareas(e){
         targetedTextareas.push(ta);
         ta.addEventListener('input', textareaInputHook);
         ta.addEventListener('keydown', textareaHookDeletedText);
-        ta.addEventListener('keydown', textareaHookArrowsKeydown);
+        addAfterEventListener(ta, 'keydown', correctCursorPositionsAfterKeydown);
+        addAfterEventListener(ta, 'click', e=>correctCursorPositionsAfterClick(e.target));
     });
 }
 

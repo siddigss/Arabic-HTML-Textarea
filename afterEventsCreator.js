@@ -11,14 +11,15 @@
 
 
 var afterEventsName = [];
+var afterEventsData = {};
 
 function addAfterEventListener(elem, eve, func){
     let afterEve = createAfterEvent(elem, eve)
     let f =function(){
         elem.dispatchEvent(afterEve);
     };
-    elem.addEventListener(eve, function(){setTimeout(f,0);})
-    elem.addEventListener(afterEve.type, e => func(e));
+    elem.addEventListener(eve, function(e){setTimeout(f,0); afterEventsData[afterEve.type]=e;})
+    elem.addEventListener(afterEve.type, e => func(afterEventsData[e.type]));
 }
 
 function createAfterEvent(){
