@@ -15,6 +15,11 @@ function enforceDir(c, dir){
     }
 }
 
+function setcurrentEnforcingDirection(dir){
+    currentEnforcingDirection = dir;
+    document.getElementById('pEnforcingDir').innerText = currentEnforcingDirection;
+}
+
 // e is an input event for a textarea.
 function textareaInputHook(e){
     content = e.target.value;
@@ -279,10 +284,10 @@ function enforcedStringLength(str){
 function changeEnforcingDirByHotkeys(e){
     if(captureSimpleHotkeys(e)){
         if(currentEnforcingDirection == 'AR'){
-            currentEnforcingDirection = 'EN';
+            setcurrentEnforcingDirection('EN');
         }
         else if(currentEnforcingDirection == 'EN'){
-            currentEnforcingDirection = 'AR';
+            setcurrentEnforcingDirection('AR');
         }
     }
 }

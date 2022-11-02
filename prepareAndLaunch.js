@@ -8,6 +8,7 @@ function fillTargetedTextareas(e){
      textareaIds.forEach(name => {
         ta = document.getElementById(name)
         targetedTextareas.push(ta);
+        ta.dir = "auto";
         ta.addEventListener('input', textareaInputHook);
         ta.addEventListener('keydown', textareaHookDeletedText);
         addAfterEventListener(ta, 'keydown', correctCursorPositionsAfterKeydown);
