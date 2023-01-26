@@ -31,6 +31,8 @@ For ease of usage this package must minimize the conflicts with other packages. 
 ### Producing and Looking for Test Cases
 By this we mean a collection of string that look different in the textarea than the way we would like to look like. Collecting such examples will help in the process and in fact allow us to define a score for Arabic support text packages in general. This naturally requires writing a way to test them automatically.
 
+## Status
+Experimental. The textarea seems to work reasonably on chrome. However, it may behave weirdly on other browsers.
 
 ## Project Structure
 * `index.html` is the project testing page.  
