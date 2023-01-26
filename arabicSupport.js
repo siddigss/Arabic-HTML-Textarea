@@ -2,11 +2,18 @@
 var LTRMark = '\u200E';
 var RTLMark = '\u200F';
 var targetedTextareas = [];
-var currentEnforcingDirection = 'AR';
+var currentEnforcingDirection = 'EN';
 var deletedText = '';
+var lastKeydownEvent;
+//var lastInputLanguage = 'AR';
 
+function enforceDir(c, dir, e){
+    if(typeof(lastKeydownEvent) != undefined){
+        if(arabicKeyPressed(lastKeydownEvent)){
+            dir = 'AR';
+        }
+    }
 
-function enforceDir(c, dir){
     if(dir == 'AR'){
         return RTLMark + c + RTLMark; 
     }
@@ -20,6 +27,32 @@ function setcurrentEnforcingDirection(dir){
     document.getElementById('pEnforcingDir').innerText = currentEnforcingDirection;
 }
 
+
+// e is a keydown event.
+function arabicKeyPressed(e){
+    switch(e.key){
+        case '.':
+        case ',':
+            return e.shiftKey;
+        case '،':
+            return true;
+        case '[':
+        case '{':
+            return e.code != 'BracketLeft';
+        case ']':
+        case '}':
+            return e.code != 'BracketRight';
+        case '>':
+            return e.code != 'Period';
+        case '<':
+            return e.code != 'Comma';
+        case '/':
+            return e.code != 'Slash';
+    }
+    return false;
+}
+
+
 // e is an input event for a textarea.
 function textareaInputHook(e){
     content = e.target.value;
@@ -28,13 +61,16 @@ function textareaInputHook(e){
         if(isAmbiguousChar(e.data)){
             let cursorPosition = e.target.selectionStart;
             e.target.value = content.substr(0, cursorPosition-1) + 
-            enforceDir(e.data, currentEnforcingDirection) +
+            enforceDir(e.data, currentEnforcingDirection, e) +
             content.substr(cursorPosition, content.length-1);    
             e.target.selectionStart = cursorPosition+2;
             e.target.selectionEnd = cursorPosition+2;
-        }    
+        }
+        if(e.target.value[e.target.selectionStart-2]=='\n'){
+            // what did I want to do here?
+        }  
     }
-    if(e.inputType == 'deleteContentBackward' || e.inputType == 'deleteContentForward'){
+    if(e.inputType == 'deleteContentBackward' || e.inputType == 'deleteContentForward'){        
         let newContent = '';
         // assume no selection, is this always the case?
         let cursorPosition = e.target.selectionStart;
@@ -170,6 +206,10 @@ function textareaHookDeletedText(e){
     return '';
 }
 
+function saveLastKeydownEvent(e){
+    lastKeydownEvent = e;
+}
+
 
 function correctCursorPositions(ta, dir){
     selection = (ta.selectionStart != ta.selectionEnd);
@@ -231,6 +271,13 @@ function correctCursorPositionsAfterKeydown(e){
     if(e.key == 'ArrowRight'){
         dir = 1;
     }
+
+    // testing
+    if(getLineLanguage(ta, ta.selectionStart) == 'Arabic'){
+        dir = - dir;
+    }
+    // end testing
+
     correctCursorPositions(ta, dir);
 }
 
@@ -275,6 +322,33 @@ function correctCursorPositionsAfterClick(ta){
 }
 
 
+
+
+function newLineDirection(){
+
+}
+
+function getLineBeginningPosition(ta, cursorPosition){
+    let i=cursorPosition-1;
+    while(i>0){
+        if(ta.value[i]=='\n')
+            return i;
+        i--;
+    }
+    return 0;
+}
+
+// returns the languagge of the first character of the line that contains cursorPosition.
+function getLineLanguage(ta, cursorPosition){
+    let c = ta.value[getLineBeginningPosition(ta, cursorPosition)];
+    if(isArabic(c))
+        return 'Arabic'
+    else
+        return 'English' 
+}
+
+
+// is this finished?
 function enforcedStringLength(str){
     tmp = str;
     tmp = tmp.replace(new RegExp(/[\u200E\u200F]/,'g'), '');
@@ -291,6 +365,46 @@ function changeEnforcingDirByHotkeys(e){
         }
     }
 }
+
+
+
+function textareaCopyHook(e){
+    let ta = e.target;
+    if(ta.selectionStart < ta.selectionEnd){
+        selectedText = ta.value.substr(ta.selectionStart, ta.selectionEnd);
+        newText = removeEnforcingChars(selectedText);
+        navigator.clipboard.writeText(newText);
+    }
+}
+
+// lacks edge cases implementation.
+function textareaPasteHook(e){
+    let ta = e.target;
+    pastedText = e.clipboardData.getData("text");
+    newPastedText = autoEnforcer(pastedText);
+    newText = ta.value.substr(0,ta.selectionStart) + newPastedText + 
+    ta.value.substr(ta.selectionEnd,ta.value.length - ta.selectionEnd);
+    let newcursorPosition = ta.selectionStart + newPastedText.length;
+    ta.value = newText;
+    ta.selectionStart = newcursorPosition;
+    ta.selectionEnd = newcursorPosition;
+    e.preventDefault();
+}
+
+function removeEnforcingChars(s){
+    newS = s.replace(new RegExp(/[\u200E\u200F]/,'g'), '');
+    return newS;
+}
+
+function autoEnforcer(s){
+    let enforcingChar = LTRMark;
+    if(currentEnforcingDirection == 'AR')
+        enforcingChar = RTLMark;
+    newS = s.replace(enforceRegex, enforcingChar + '$&' + enforcingChar);
+    return newS;
+}
+
+
 
 
 // helping functions
@@ -313,6 +427,9 @@ function isChar(c){
 
 
 
+
+
+
 // credits?
 function toUnicode(str) {
 	return str.split('').map(function (value, index, array) {
@@ -324,3 +441,21 @@ function toUnicode(str) {
 	}).join('');
 }
 
+function isArabic(text) {
+    var pattern = /[\u0600-\u06FF\u0750-\u077F]/;
+    result = pattern.test(text);
+    return result;
+}
+function isEnglsih(text) {
+    var pattern = /[a-zA-Z]/;
+    result = pattern.test(text);
+    return result;
+}
+
+function isRTL(s){           
+    var ltrChars    = 'A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF'+'\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF',
+        rtlChars    = '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC',
+        rtlDirCheck = new RegExp('^[^'+ltrChars+']*['+rtlChars+']');
+
+    return rtlDirCheck.test(s);
+};

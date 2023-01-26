@@ -23,7 +23,7 @@ function addAfterEventListener(elem, eve, func){
 }
 
 function createAfterEvent(){
-    // approximate bound from birthday paradox to avoid collisions with 99%.
+    // approximate bound from birthday paradox to avoid collisions with more than 50%.
     stringLength = Math.ceil(2*Math.log(afterEventsName.length + 1)/Math.log(36));
     stringLength = Math.max(5, stringLength);
     s = '';

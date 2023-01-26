@@ -11,8 +11,12 @@ function fillTargetedTextareas(e){
         ta.dir = "auto";
         ta.addEventListener('input', textareaInputHook);
         ta.addEventListener('keydown', textareaHookDeletedText);
+        ta.addEventListener('keydown', saveLastKeydownEvent);
         addAfterEventListener(ta, 'keydown', correctCursorPositionsAfterKeydown);
         addAfterEventListener(ta, 'click', e=>correctCursorPositionsAfterClick(e.target));
+        addAfterEventListener(ta, 'selection', e=>correctCursorPositionsAfterClick(e.target));
+        ta.addEventListener('copy', textareaCopyHook);
+        ta.addEventListener('paste', textareaPasteHook);
     });
 }
 
@@ -26,7 +30,7 @@ function hotkeysPreperations(){
 window.addEventListener('load', fillTargetedTextareas);
 window.addEventListener('load', hotkeysPreperations);
 window.addEventListener('keydown',changeEnforcingDirByHotkeys);
-
+//document.addEventListener('copy', (event) => { console.log('copied?!'); navigator.clipboard.writeText('New Text');});
 
 
 

@@ -22,7 +22,7 @@ function captureSimpleHotkeys(e){
                 captured = false;
             }
         }
-        if(element[element.length-1] != (e.key).toLowerCase()){
+        if(element[element.length-1].toLowerCase() != (e.code).toLowerCase()){
             captured = false;
         }
         if(continuousCaptureCount[element]>0 && captured == false){
