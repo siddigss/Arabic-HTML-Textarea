@@ -1,6 +1,8 @@
 
 var LTRMark = '\u200E';
 var RTLMark = '\u200F';
+//var ArabicLineBegining = RTLMark + '\u061C' + RTLMark;
+//var EnglishLineBegining = LTRMark + '\u061C' + LTRMark;
 var targetedTextareas = [];
 var currentEnforcingDirection = 'EN';
 var deletedText = '';
@@ -22,7 +24,7 @@ function enforceDir(c, dir, e){
     }
 }
 
-function setcurrentEnforcingDirection(dir){
+function setCurrentEnforcingDirection(dir){
     currentEnforcingDirection = dir;
     document.getElementById('pEnforcingDir').innerText = currentEnforcingDirection;
 }
@@ -57,7 +59,34 @@ function arabicKeyPressed(e){
 function textareaInputHook(e){
     content = e.target.value;
     if(e.inputType == 'insertText'){
-        //if(isAmbiguousChar(content[content.length-1])){
+        if(e.target.value[e.target.selectionStart-3]=='\n'){
+            // what did I want to do here?
+            let ta = e.target;
+            let cursorPosition = ta.selectionStart;
+            let inputChar = e.data;
+            let dirChar = RTLMark;
+            if(isEnglish(inputChar) || (isAmbiguousChar(e.data) && currentEnforcingDirection=='EN')){
+                dirChar = LTRMark;
+            }
+            ta.value = ta.value.substr(0, cursorPosition-4) + dirChar + '\n' + dirChar + 
+                    ta.value.substr(cursorPosition-1, ta.value.length-cursorPosition+1);
+            e.target.selectionStart = cursorPosition;
+            e.target.selectionEnd = cursorPosition;
+        }
+        if(e.target.selectionStart==2){
+            let ta = e.target;
+            let cursorPosition = ta.selectionStart;
+            let inputChar = e.data;
+            let dirChar = RTLMark;
+            if(isEnglish(inputChar) || (isAmbiguousChar(e.data) && currentEnforcingDirection=='EN')){
+                dirChar = LTRMark;
+            }
+            ta.value = dirChar + ta.value.substr(1, ta.value.length-1);
+            e.target.selectionStart = cursorPosition;
+            e.target.selectionEnd = cursorPosition;
+        }  
+
+
         if(isAmbiguousChar(e.data)){
             let cursorPosition = e.target.selectionStart;
             e.target.value = content.substr(0, cursorPosition-1) + 
@@ -66,10 +95,16 @@ function textareaInputHook(e){
             e.target.selectionStart = cursorPosition+2;
             e.target.selectionEnd = cursorPosition+2;
         }
-        if(e.target.value[e.target.selectionStart-2]=='\n'){
-            // what did I want to do here?
-        }  
     }
+    if(e.inputType == 'insertLineBreak'){
+        let cursorPosition = e.target.selectionStart;
+        e.target.value = content.substr(0, cursorPosition-1) + 
+            enforceDir('\n', currentEnforcingDirection, e) +
+            content.substr(cursorPosition, content.length-1);   
+            e.target.selectionStart = cursorPosition+2;
+            e.target.selectionEnd = cursorPosition+2;  
+    }
+
     if(e.inputType == 'deleteContentBackward' || e.inputType == 'deleteContentForward'){        
         let newContent = '';
         // assume no selection, is this always the case?
@@ -181,13 +216,26 @@ function textareaInputHook(e){
 
 
     // for testing, remove later
-    document.getElementById('textarea2').value = toUnicode(e.target.value);
+    try{
+        document.getElementById('textarea2').value = toUnicode(e.target.value);
+    }
+    catch(error){
+        console.log('No debugging textarea to show hexes.');
+    }
 }
 
 
 function textareaHookDeletedText(e){
+
+
     if(e.key == 'Backspace'){
-        let correction = 0;;
+        // to avoid deleting the first character which is the direction of the first line.
+        if(e.target.value.length == 1){
+            e.preventDefault();
+            return '';
+        }    
+
+        let correction = 0;
         if(e.target.selectionStart == e.target.selectionEnd){
             correction = -1;
         }
@@ -195,6 +243,12 @@ function textareaHookDeletedText(e){
             , e.target.selectionEnd - e.target.selectionStart - correction);
     }
     if(e.key == 'Delete'){
+        // to avoid deleting the first character which is the direction of the first line.
+        if(e.target.value.length == 1){
+            e.preventDefault();
+            return '';
+        }
+    
         let correction = 0;
         if(e.target.selectionStart == e.target.selectionEnd){
             correction = +1;
@@ -216,6 +270,21 @@ function correctCursorPositions(ta, dir){
     currentSelectionStart = ta.selectionStart;
     currentSelectionEnd = ta.selectionEnd;
 
+
+    // quick clumsy fix.
+    if(currentSelectionStart == 0){
+        currentSelectionStart = 1;
+        if(currentSelectionEnd == 0){
+            currentSelectionEnd = 1;
+        }
+        selection = (ta.selectionStart != ta.selectionEnd);
+    }
+
+    // end of clumsy fix
+
+
+
+
     if(isAmbiguousChar(ta.value[currentSelectionStart-1])){
         currentSelectionStart = currentSelectionStart - 2;
         if(dir == 1){
@@ -227,11 +296,13 @@ function correctCursorPositions(ta, dir){
             if(isAmbiguousChar(ta.value[currentSelectionStart-2])){
                 // nothig
             }
-            else{   // must mean the letter after is ambiguous.
-                currentSelectionStart = currentSelectionStart - 1;
-                if(dir == 1){
-                    currentSelectionStart = currentSelectionStart + 3;
-                }        
+            else{   // must mean the letter after is ambiguous except if it is the beginning of the textarea.
+                if(currentSelectionStart > 1){
+                    currentSelectionStart = currentSelectionStart - 1;
+                    if(dir == 1){
+                        currentSelectionStart = currentSelectionStart + 3;
+                    }            
+                }
             }
     }
     if(!selection){
@@ -276,6 +347,20 @@ function correctCursorPositionsAfterKeydown(e){
     if(getLineLanguage(ta, ta.selectionStart) == 'Arabic'){
         dir = - dir;
     }
+    // a little hacky solution for the arrowup and arrowdown movements when there is no text in a line. Needs to check more if it
+    // always work and does not cause other issues.
+    if(e.key == 'ArrowUp' && getLineLanguage(ta, ta.selectionStart) == 'English'){
+        dir = 1;
+    }
+    if(e.key == 'ArrowDown' && getLineLanguage(ta, ta.selectionStart) == 'English'){
+        dir = 1;
+        if(getPreviousLineLanguage(ta, ta.selectionStart) == 'Arabic'){
+            dir = 0;
+        }
+    }
+    if(e.key == 'ArrowUp' && getLineLanguage(ta, ta.selectionStart) == 'Arabic'){
+        dir = -1;
+    }
     // end testing
 
     correctCursorPositions(ta, dir);
@@ -287,6 +372,15 @@ function correctCursorPositionsAfterClick(ta){
     currentSelectionStart = ta.selectionStart;
     currentSelectionEnd = ta.selectionEnd;
 
+    if(currentSelectionStart == 0){
+        currentSelectionStart = 1;
+        if(currentSelectionEnd == 0){
+            currentSelectionEnd = 1;
+        }
+        selection = (ta.selectionStart != ta.selectionEnd);
+    }
+
+
     if(isAmbiguousChar(ta.value[currentSelectionStart-1])){
         currentSelectionStart = currentSelectionStart + 1;
     }
@@ -295,8 +389,9 @@ function correctCursorPositionsAfterClick(ta){
             if(isAmbiguousChar(ta.value[currentSelectionStart-2])){
                 // nothig
             }
-            else{   // must mean the letter after is ambiguous.
-                currentSelectionStart = currentSelectionStart - 1;
+            else{   // must mean the letter after is ambiguous except if it is the beginning of the textarea.
+                if(currentSelectionStart > 1)
+                    currentSelectionStart = currentSelectionStart - 1;
             }
     }
     if(!selection){
@@ -332,20 +427,39 @@ function getLineBeginningPosition(ta, cursorPosition){
     let i=cursorPosition-1;
     while(i>0){
         if(ta.value[i]=='\n')
-            return i;
+            return i+2;
         i--;
     }
-    return 0;
+    return 1;
 }
 
 // returns the languagge of the first character of the line that contains cursorPosition.
 function getLineLanguage(ta, cursorPosition){
-    let c = ta.value[getLineBeginningPosition(ta, cursorPosition)];
+    let c = ta.value[getLineBeginningPosition(ta, cursorPosition)-1];
+    /* old method
     if(isArabic(c))
         return 'Arabic'
     else
         return 'English' 
+    */
+   if(c == RTLMark)
+        return 'Arabic';
+    if(c == LTRMark)
+        return 'English';
 }
+function getPreviousLineLanguage(ta, cursorPosition){
+    let index = getLineBeginningPosition(ta, cursorPosition);
+    if(index == 1){
+        return null;
+    }
+    index = getLineBeginningPosition(ta, index-3)-1;
+    let c = ta.value[index];
+    if(c == RTLMark)
+        return 'Arabic';
+    if(c == LTRMark)
+        return 'English';
+}
+
 
 
 // is this finished?
@@ -356,12 +470,12 @@ function enforcedStringLength(str){
 
 
 function changeEnforcingDirByHotkeys(e){
-    if(captureSimpleHotkeys(e)){
+    if(captureSimpleHotkeys(e, changeEnforcingDirShortcuts)){
         if(currentEnforcingDirection == 'AR'){
-            setcurrentEnforcingDirection('EN');
+            setCurrentEnforcingDirection('EN');
         }
         else if(currentEnforcingDirection == 'EN'){
-            setcurrentEnforcingDirection('AR');
+            setCurrentEnforcingDirection('AR');
         }
     }
 }
@@ -402,6 +516,46 @@ function autoEnforcer(s){
         enforcingChar = RTLMark;
     newS = s.replace(enforceRegex, enforcingChar + '$&' + enforcingChar);
     return newS;
+}
+
+function changeLineLanguageByHotKeys(e){
+    if(captureSimpleHotkeys(e, changeLineLanguageArabic)){
+        setLineLanguage(e.target, e.target.selectionStart, 'Arabic')
+        e.preventDefault();
+    }
+    if(captureSimpleHotkeys(e, changeLineLanguageEnglsih)){
+        setLineLanguage(e.target, e.target.selectionStart, 'English')
+        e.preventDefault();
+    }
+    // looks clumsy, but works for now. This is to stop Ctrl+Shift from chaing the dir attribute of the textarea.
+    e.target.dir = "auto";
+}
+
+function setLineLanguage(ta, cursorPosition, language){
+    let lineStart = getLineBeginningPosition(ta, cursorPosition);
+    let lineStartString = '';
+    if(language == 'Arabic'){
+        if(lineStart == 1){
+            lineStartString = RTLMark;
+        }
+        else{
+            lineStartString = RTLMark + '\n' + RTLMark;
+        }
+    }
+    else if(language == 'English'){
+        if(lineStart == 1){
+            lineStartString = LTRMark;
+        }
+        else{
+            lineStartString = LTRMark + '\n' + LTRMark;
+        }
+    }
+    else{
+        console.assert('Unkowned Language');
+    }
+    ta.value = ta.value.substr(0, lineStart-lineStartString.length) + lineStartString + ta.value.substr(lineStart, ta.value.length-lineStart);
+    ta.selectionStart = cursorPosition;
+    ta.selectionEnd = cursorPosition;
 }
 
 
@@ -446,7 +600,7 @@ function isArabic(text) {
     result = pattern.test(text);
     return result;
 }
-function isEnglsih(text) {
+function isEnglish(text) {
     var pattern = /[a-zA-Z]/;
     result = pattern.test(text);
     return result;
