@@ -1,18 +1,58 @@
 <!DOCTYPE html>
 <html>
-<body id='root'>
+<head>
+<title>W3.CSS Template</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amiri">
+<style>
+body,h1 {font-family: "Amiri", sans-serif;}
+body, html {height: 100%; font-family: "Lemonada", sans-serif}
+.bgimg {
+  background-image: url('/5.png');
+  min-height: 100%;
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+</style>
+</head>
+<body>
 
-<h1 id="H1">Arbic Textarea</h1>
+<div class="bgimg w3-display-container w3-animate-opacity w3-text-black">
+  <div class="w3-display-topright w3-padding-large w3-xlarge">
+    الصندوق العربي
+  </div>
+  <div class="w3-display-middle" >
+    <div class="w3-large w3-center" >
+        <h1 class="w3-jumbo w3-animate-top">الصندوق العربي المبسط</h1>
+    </div>
+    <div class="w3-large w3-center">
+        <p id="pEnforcingDir" style="display:inline" dir="rtl">EN</p>
+        <p style="display:inline" dir="rtl">إتجاه الرموز المربكة: </p>
+    </div>
 
-<p>Write text in this textarea.</p>
-<p>Use Ctrl+Shift+E to change the enforcing direction between Arabic and English.</p>
-<p style="display:inline">Current Enforcing Direction is: </p><p id="pEnforcingDir" style="display:inline">EN</p>
-<br/>
-<br/>
-<textarea id="textarea1" rows="4" cols="50" dir="auto"></textarea> 
-<br/>
-<p>The following textarea displays the contents of the upper textarea in unicode.</p>
-<textarea id="textarea2" rows="4" cols="50"></textarea> 
+    <textarea id="textarea1" rows="4" cols="50" dir="auto" style="width: 745px; height: 234px;"></textarea> 
+    <hr class="w3-border-grey" style="margin:auto;width:40%">
+    <div class="w3-large w3-center">
+
+    <p dir="rtl">إرشادات وتوضيحات</p>
+    <p dir="rtl">عند الكتابة بالعربية والإنجليزية بحيث تتخللها علامات ترقيم وبعض رموز المستخدمة في البرمجة (نعبر عنها هنا يقولنا الرموز المربكة) بشكل كثيف فإن 
+        خوارزمية unicode للكتابة ثنائية الاتجاه المعتمدة ليست مرضية. هذا الصندوق يعطي الكاتب مسؤولية تحديد اتجاه هذه الرموز وكذا اتجاه السطور.
+    </p>
+    <p dir="rtl">لتغيير اتجاه الرموز المربكة اضغط Ctrl+Shift+E </p>
+    <p>الاتجاه الحالي للرموز المربكة ظاهر أعلى الصندوق</p>
+    <p dir="rtl">لتغيير اتجاه السطر إلى اليسار اضغط Ctrl+Shift اليسرى وكذا بالنسبة للاتجاه الأيمن.</p>
+    </div>
+  </div>
+  <!--
+  <div class="w3-display-bottomleft w3-padding-large">
+    Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a>
+  </div>
+    -->
+</div>
 
 </body>
 
@@ -23,5 +63,4 @@
 <script type="text/javascript" src="hotkeys.js"></script>
 <script type="text/javascript" src="arabicSupport.js"></script>
 <script type="text/javascript" src="prepareAndLaunch.js"></script>
-
 </html>
