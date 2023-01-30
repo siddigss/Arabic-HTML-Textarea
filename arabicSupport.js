@@ -473,9 +473,25 @@ function changeEnforcingDirByHotkeys(e){
     if(captureSimpleHotkeys(e, changeEnforcingDirShortcuts)){
         if(currentEnforcingDirection == 'AR'){
             setCurrentEnforcingDirection('EN');
+            let ta = e.target;
+            let selectionStart = ta.selectionStart;
+            let selectionEnd = ta.selectionEnd;
+            let s = ta.value.substr(selectionStart, selectionEnd-selectionStart);
+            s = s.replace(/\u200F/g, "\u200E");
+            ta.value = ta.value.substr(0, selectionStart) + s + ta.value.substr(selectionEnd, ta.value.length-selectionEnd);
+            ta.selectionStart = selectionStart;
+            ta.selectionEnd = selectionEnd;
         }
         else if(currentEnforcingDirection == 'EN'){
             setCurrentEnforcingDirection('AR');
+            let ta = e.target;
+            let selectionStart = ta.selectionStart;
+            let selectionEnd = ta.selectionEnd;
+            let s = ta.value.substr(selectionStart, selectionEnd-selectionStart);
+            s = s.replace(/\u200E/g, "\u200F");
+            ta.value = ta.value.substr(0, selectionStart) + s + ta.value.substr(selectionEnd, ta.value.length-selectionEnd);
+            ta.selectionStart = selectionStart;
+            ta.selectionEnd = selectionEnd;
         }
     }
 }
@@ -579,6 +595,10 @@ function isChar(c){
     return false;
 }
 
+function concatenateRegex(regex1, regex2){
+    var flags = (regex1.flags + regex2.flags).split("").sort().join("").replace(/(.)(?=.*\1)/g, "");
+    return new RegExp(regex1.source + regex2.source, flags);    
+}
 
 
 

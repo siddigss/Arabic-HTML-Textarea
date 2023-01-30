@@ -18,9 +18,9 @@ function fillTargetedTextareas(e){
         addAfterEventListener(ta, 'selection', e=>correctCursorPositionsAfterClick(e.target));
         ta.addEventListener('copy', textareaCopyHook);
         ta.addEventListener('paste', textareaPasteHook);
-        //ta.addEventListener('keydown',changeEnforcingDirByHotkeys); // we prefer the usage of window below.
-        ta.addEventListener('keydown',changeLineLanguageByHotKeys);
-        //ta.addEventListener('keyup',changeLineLanguageByHotKeys);
+        ta.addEventListener('keydown',changeEnforcingDirByHotkeys); // we prefer the usage of window below.
+        //ta.addEventListener('keydown',changeLineLanguageByHotKeys);
+        ta.addEventListener('keyup',changeLineLanguageByHotKeys);
         addAfterEventListener(ta, 'keyup', changeLineLanguageByHotKeys);
         ta.value = RTLMark;
         ta.selectionStart = 1;
@@ -37,7 +37,7 @@ function hotkeysPreperations(){
 // writing document instead of window doesn't work.
 window.addEventListener('load', fillTargetedTextareas);
 window.addEventListener('load', hotkeysPreperations);
-window.addEventListener('keydown',changeEnforcingDirByHotkeys);
+//window.addEventListener('keydown',changeEnforcingDirByHotkeys);
 
 
 
