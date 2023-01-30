@@ -12,6 +12,10 @@ This project started with the idea od providing appropraite minimal eye-relievin
 Check the [projet page](https://siddigss.github.io/Arabic-HTML-Textarea/).
 
 
+
+## Deployment
+TODO
+
 ## Main tasks
 ### Event handling
 Adding these additional characters require changing the default behaviour for
