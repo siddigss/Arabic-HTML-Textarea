@@ -4,10 +4,10 @@ var textareaIds = [];
 // The layout assumed here is qwerty for English and the usualy Arabic one for Arabic.
 
 // \u061C is Arabic Letter Mark (ALM).
-var enforceRegex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~\n]/;
-var oneKeyRegex = /[`!@#$%^&*()_+\-=;':"\\|~]/; // ":?
-var twoKeysRegex = /[\[\]{}.,<>\/]/;
-var noNeedToEnforceRegex = /[?؟]/; // Our algorithm does not modify these.
+var enforceRegex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/~\n]/;
+//var oneKeyRegex = /[`!@#$%^&*()_+\-=;':"\\|~]/; // ":?
+//var twoKeysRegex = /[\[\]{}.,<>\/]/;
+//var noNeedToEnforceRegex = /[?؟]/; // Our algorithm does not modify these.
 
 
 // The format for shortcuts is a combination of ctrl, shift, alt and possibly one letter a the end.

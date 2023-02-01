@@ -57,7 +57,7 @@ function arabicKeyPressed(e){
 
 // e is an input event for a textarea.
 function textareaInputHook(e){
-    content = e.target.value;
+    let content = e.target.value;
     if(e.inputType == 'insertText'){
         if(e.target.value[e.target.selectionStart-3]=='\n'){
             // what did I want to do here?
@@ -334,7 +334,7 @@ function correctCursorPositions(ta, dir){
 }
 
 function correctCursorPositionsAfterKeydown(e){
-    ta = e.target;
+    let ta = e.target;
     dir = 0;
     if(e.key == 'ArrowLeft'){
         dir = -1;
