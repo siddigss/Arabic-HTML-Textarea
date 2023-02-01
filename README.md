@@ -14,7 +14,17 @@ Check the [projet page](https://siddigss.github.io/Arabic-HTML-Textarea/).
 
 
 ## Deployment
-TODO
+To deploy the package add the following lines to your html file:
+
+```<script type="text/javascript" src="afterEventsCreator.js"></script>
+<script type="text/javascript" src="debuggingTools.js"></script>
+<script type="text/javascript" src="globalVars.js"></script>
+<script type="text/javascript" src="hotkeys.js"></script>
+<script type="text/javascript" src="arabicSupport.js"></script>
+<script type="text/javascript" src="prepareAndLaunch.js"></script>
+```
+For every textarea that you like to use this package add the attribute `data-dirEnforce="user"` to it.  
+Check the [projet page](https://siddigss.github.io/Arabic-HTML-Textarea/) source for example. 
 
 ## Main tasks
 ### Event handling
