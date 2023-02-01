@@ -43,6 +43,8 @@ At the moment chrome and edge seem to work reasonably but firefox behaves weirdl
 ### Ensure Compatibility with Plain Textarea
 For ease of usage this package must minimize the conflicts with other packages. This endeavour rises querstions about property `value` of the textarea and copying and pasting and possibly other questiosn.
 
+### Ensure Global Variables do not collide with other packages.
+
 ### Producing and Looking for Test Cases
 By this we mean a collection of string that look different in the textarea than the way we would like to look like. Collecting such examples will help in the process and in fact allow us to define a score for Arabic support text packages in general. This naturally requires writing a way to test them automatically.
 
