@@ -24,6 +24,7 @@ To deploy the package add the following lines to your html file:
 <script type="text/javascript" src="prepareAndLaunch.js"></script>
 ```
 For every textarea that you like to use this package add the attribute `data-dirEnforce="user"` to it.  
+
 Check the [projet page](https://siddigss.github.io/Arabic-HTML-Textarea/) source for example. 
 
 ## Main tasks
