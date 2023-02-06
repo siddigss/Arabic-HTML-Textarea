@@ -7,6 +7,8 @@ var targetedTextareas = [];
 var currentEnforcingDirection = 'EN';
 var deletedText = '';
 var lastKeydownEvent;
+var lastSelectionStartBeforeKeyDown;
+var lastSelectionEndBeforeKeyDown;
 //var lastInputLanguage = 'AR';
 
 function enforceDir(c, dir, e){
@@ -261,14 +263,19 @@ function textareaHookDeletedText(e){
 }
 
 function saveLastKeydownEvent(e){
+    lastSelectionStartBeforeKeyDown = e.target.selectionStart;
+    lastSelectionEndBeforeKeyDown = e.target.selectionEnd;
     lastKeydownEvent = e;
 }
 
 
-function correctCursorPositions(ta, dir){
-    selection = (ta.selectionStart != ta.selectionEnd);
-    currentSelectionStart = ta.selectionStart;
-    currentSelectionEnd = ta.selectionEnd;
+function correctCursorPositions(ta, dir, correctNewLine){
+    let selection = (ta.selectionStart != ta.selectionEnd);
+    let currentSelectionStart = ta.selectionStart;
+    let currentSelectionEnd = ta.selectionEnd;
+
+    //let initialCurrentSelectionStart = currentSelectionStart;
+    //let initialCurrentSelectionEnd = currentSelectionEnd;
 
 
     // quick clumsy fix.
@@ -329,13 +336,40 @@ function correctCursorPositions(ta, dir){
         }    
     }
 
+    if(correctNewLine){
+        let cs = currentSelectionStart <= lastSelectionStartBeforeKeyDown ? currentSelectionStart : lastSelectionStartBeforeKeyDown;
+        let ce = currentSelectionStart >= lastSelectionStartBeforeKeyDown ? currentSelectionStart : lastSelectionStartBeforeKeyDown;
+        if((ta.value.substr(cs, ce-cs).match(/\n/g) || []).length > 1){
+            if(ta.value[currentSelectionStart+1] == '\n' && dir == -1){
+                currentSelectionStart = currentSelectionStart +3;
+                currentSelectionEnd = currentSelectionEnd +3;
+            }
+            if(ta.value[currentSelectionStart-2] == '\n' && dir == 1){
+                currentSelectionStart = currentSelectionStart -3;
+                currentSelectionEnd = currentSelectionEnd -3;
+            }    
+        }
+        if((ta.value.substr(cs, ce-cs).match(/\n/g) || []).length == 0){
+            if(ta.value[currentSelectionStart-2] == '\n' && dir == -1){
+                currentSelectionStart = currentSelectionStart -3;
+                currentSelectionEnd = currentSelectionEnd -3;
+            }
+            if(ta.value[currentSelectionStart+1] == '\n' && dir == 1){
+                currentSelectionStart = currentSelectionStart +3;
+                currentSelectionEnd = currentSelectionEnd +3;
+            }    
+        }
+    }
+
+
     ta.selectionStart = currentSelectionStart;
     ta.selectionEnd = currentSelectionEnd;
 }
 
 function correctCursorPositionsAfterKeydown(e){
     let ta = e.target;
-    dir = 0;
+    let dir = 0;
+    let newLineCorrection = false;
     if(e.key == 'ArrowLeft'){
         dir = -1;
     }
@@ -349,21 +383,23 @@ function correctCursorPositionsAfterKeydown(e){
     }
     // a little hacky solution for the arrowup and arrowdown movements when there is no text in a line. Needs to check more if it
     // always work and does not cause other issues.
-    if(e.key == 'ArrowUp' && getLineLanguage(ta, ta.selectionStart) == 'English'){
-        dir = 1;
-    }
-    if(e.key == 'ArrowDown' && getLineLanguage(ta, ta.selectionStart) == 'English'){
-        dir = 1;
-        if(getPreviousLineLanguage(ta, ta.selectionStart) == 'Arabic'){
-            dir = 0;
-        }
-    }
-    if(e.key == 'ArrowUp' && getLineLanguage(ta, ta.selectionStart) == 'Arabic'){
+    if(e.key == 'ArrowUp' /*&& getLineLanguage(ta, ta.selectionStart) == 'English'*/){
         dir = -1;
+        newLineCorrection = true;
     }
+    if(e.key == 'ArrowDown' /*&& getLineLanguage(ta, ta.selectionStart) == 'English'*/){
+        dir = 1;
+        newLineCorrection = true;
+        /*if(getPreviousLineLanguage(ta, ta.selectionStart) == 'Arabic'){
+            dir = 0;
+        }*/
+    }
+    /*if(e.key == 'ArrowUp' && getLineLanguage(ta, ta.selectionStart) == 'Arabic'){
+        dir = -1;
+    }*/
     // end testing
 
-    correctCursorPositions(ta, dir);
+    correctCursorPositions(ta, dir, newLineCorrection);
 }
 
 
